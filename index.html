@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Conference</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Video Conference</h1>
+        <video id="videoElement" autoplay playsinline></video>
+        <video id="secondVideoElement" autoplay playsinline style="display: none;"></video>
+        <button id="toggleCameraButton">Toggle Camera</button>
+        <button id="toggleSecondCameraButton">Toggle Second Camera</button>
+        <button id="toggleMicrophoneButton">Toggle Microphone</button>
+    </div>
+
+    <script>
+        const videoElement = document.getElementById('videoElement');
+        const secondVideoElement = document.getElementById('secondVideoElement');
+        const toggleCameraButton = document.getElementById('toggleCameraButton');
+        const toggleSecondCameraButton = document.getElementById('toggleSecondCameraButton');
+        const toggleMicrophoneButton = document.getElementById('toggleMicrophoneButton');
+
+        async function getMedia(videoElement) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing camera or microphone:', error);
+            }
+        }
+
+        toggleCameraButton.addEventListener('click', () => {
+            const videoTrack = videoElement.srcObject.getVideoTracks()[0];
+            videoTrack.enabled = !videoTrack.enabled;
+            toggleCameraButton.textContent = videoTrack.enabled ? 'Turn Camera Off' : 'Turn Camera On';
+        });
+
+        toggleSecondCameraButton.addEventListener('click', () => {
+            const secondVideoTrack = secondVideoElement.srcObject ? secondVideoElement.srcObject.getVideoTracks()[0] : null;
+            if (secondVideoTrack) {
+                secondVideoTrack.stop();
+                secondVideoElement.srcObject = null;
+                secondVideoElement.style.display = 'none';
+            } else {
+                getMedia(secondVideoElement);
+                secondVideoElement.style.display = 'block';
+            }
+        });
+
+        toggleMicrophoneButton.addEventListener('click', () => {
+            const audioTrack = videoElement.srcObject.getAudioTracks()[0];
+            audioTrack.enabled = !audioTrack.enabled;
+            toggleMicrophoneButton.textContent = audioTrack.enabled ? 'Turn Microphone Off' : 'Turn Microphone On';
+        });
+
+        getMedia(videoElement);
+    </script>
+</body>
+</html>
